@@ -4,9 +4,32 @@ version '1.0-SNAPSHOT'
 apply plugin: 'java'
 apply plugin: 'idea'
 
-sourceSets {
-    integtests
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven { url 'http://artifactory.corp/artifactory/repo' }
 }
+
+configurations {
+    integtestsCompile { extendsFrom compile }
+    integtestsRutime { extendsFrom integtestsCompile, runtime }
+}
+
+sourceSets {
+    integtests {
+        java {
+            srcDirs = ['src/integtest/java']
+        }
+        compileClasspath = sourceSets.main.output + configurations.integtestsCompile
+        runtimeClasspath = output + sourceSets.main.output + configurations.integtestsRutime
+    }
+
+    task integrationTests(type: Test) {
+        testClassesDir = sourceSets.integTest.classesDir
+        classpath = sourceSets.integTest.runtimeClasspath
+    }
+}
+
 
 
 
